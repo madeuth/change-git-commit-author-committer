@@ -2,8 +2,8 @@
 
 # Globals
 NAME="name"
-EMAIL="email"
-DOMAIN="github.com"
+EMAIL="name@domain.com"
+DOMAIN="domain.com"
 
 # Greetings
 echo "Welcome to the git commit environment variables modifier assistant."
@@ -19,8 +19,8 @@ do
     # Moving inside created directory
     cd $repo
 
-    # Get username to filter out commits
-    echo -n "Type in a username to match (leave blank to match all commits): "
+    # Get name to filter out commits
+    echo -n "Type in a name to match (leave blank to match all commits): "
     read match
 
     # If match provided then filter out commits
@@ -39,7 +39,7 @@ do
             export GIT_COMMITTER_EMAIL='$EMAIL'
         fi
         '
-    # else update all commits
+    # else modify all commits
     else
         git filter-branch -f --env-filter '
         export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
@@ -50,7 +50,7 @@ do
         '
     fi
 
-    # Push modifications to server
+    # Push modifications to repository
     git push -f https://$NAME@$DOMAIN/$NAME/$repo.git
     
     # Moving out of directory
