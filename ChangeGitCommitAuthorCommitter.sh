@@ -29,9 +29,9 @@ get_old_email() {
 }
 
 build_filter() {
-    if [ -n "$NEW_NAME" && -n "$NEW_EMAIL" ]
+    if [ -n "$NEW_NAME" -a -n "$NEW_EMAIL" ]
     then
-        if [ -z "$OLD_NAME" && -z "$OLD_EMAIL" ]
+        if [ -z "$OLD_NAME" -a -z "$OLD_EMAIL" ]
         then
             FILTER='
                 export GIT_AUTHOR_NAME='$NEW_NAME'
@@ -40,15 +40,15 @@ build_filter() {
                 export GIT_COMMITTER_NAME='$NEW_NAME'
                 export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
             '
-        elif [ -n "$OLD_NAME" && -n "$OLD_EMAIL" ]
+        elif [ -n "$OLD_NAME" -a -n "$OLD_EMAIL" ]
         then
             FILTER='
-                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' && "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_AUTHOR_NAME='$NEW_NAME'
                     export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
                 fi
-                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' && "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                     export GIT_COMMITTER_NAME='$NEW_NAME'
@@ -88,21 +88,21 @@ build_filter() {
         fi
     elif [ -n "$NEW_NAME" ]
     then
-        if [ -z "$OLD_NAME" && -z "$OLD_EMAIL" ]
+        if [ -z "$OLD_NAME" -a -z "$OLD_EMAIL" ]
         then
             FILTER='
                 export GIT_AUTHOR_NAME='$NEW_NAME'
                 export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                 export GIT_COMMITTER_NAME='$NEW_NAME'
             '
-        elif [ -n "$OLD_NAME" && -n "$OLD_EMAIL" ]
+        elif [ -n "$OLD_NAME" -a -n "$OLD_EMAIL" ]
         then
             FILTER='
-                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' && "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_AUTHOR_NAME='$NEW_NAME'
                 fi
-                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' && "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                     export GIT_COMMITTER_NAME='$NEW_NAME'
@@ -137,21 +137,21 @@ build_filter() {
         fi
     elif [ -n "$NEW_EMAIL" ]
     then
-        if [ -z "$OLD_NAME" && -z "$OLD_EMAIL" ]
+        if [ -z "$OLD_NAME" -a -z "$OLD_EMAIL" ]
         then
             FILTER='
                 export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
                 export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                 export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
             '
-        elif [ -n "$OLD_NAME" && -n "$OLD_EMAIL" ]
+        elif [ -n "$OLD_NAME" -a -n "$OLD_EMAIL" ]
         then
             FILTER='
-                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' && "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
                 fi
-                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' && "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                     export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
@@ -256,6 +256,12 @@ do
     done
 
     # Build filter
+    VARS="
+        NEW_NAME=$NEW_NAME
+        OLD_NAME=$OLD_NAME
+        NEW_EMAIL=$NEW_EMAIL
+        OLD_EMAIL=$OLD_EMAIL
+    "
     build_filter
 
     # Execute query
@@ -266,7 +272,7 @@ do
         read choice
         case $choice in
             y)
-                git filter-branch -f --env-filter $FILTER
+                git filter-branch -f --env-filter "$VARS$FILTER"
                 echo "Operation successful!"
                 break
                 ;;
