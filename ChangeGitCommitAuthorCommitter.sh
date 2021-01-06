@@ -267,7 +267,7 @@ do
     # Execute query
     while : ;
     do
-        echo -n "Are you sure you want to apply those changes? This action is irreversible."
+        echo "Are you sure you want to apply those changes? This action is irreversible."
         echo "y) yes n) no"
         read choice
         case $choice in
@@ -289,7 +289,7 @@ do
     # Run again?
     while : ;
     do
-        echo -n "Do you want to run again?"
+        echo "Do you want to run again?"
         echo "y) yes n) no"
         read choice
         case $choice in
