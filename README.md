@@ -1,5 +1,3 @@
-# git-commit-env-modifier
+# change-git-commit-author-committer
 
-A small script to change a git user's name and email on commits.
-
-Works for both GitHub repositories and GitLab projects.
+A small script to change git author/committer username and email address on git commits, while keeping original date.
