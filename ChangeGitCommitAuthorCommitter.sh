@@ -1,64 +1,304 @@
 #!/bin/sh
 
 # Globals
-NAME="name"
-EMAIL="name@domain.com"
-DOMAIN="domain.com"
+NEW_NAME=
+OLD_NAME=
+NEW_EMAIL=
+OLD_EMAIL=
+FILTER=
+
+# Getters
+get_new_name() {
+    echo -n "What is your new username? "
+    read NEW_NAME
+}
+
+get_new_email() {
+    echo -n "What is your new email address? "
+    read NEW_EMAIL
+}
+
+get_old_name() {
+    echo -n "What is your old username? "
+    read OLD_NAME
+}
+
+get_old_email() {
+    echo -n "What is your old email address? "
+    read OLD_EMAIL
+}
+
+build_filter() {
+    if [ -n "$NEW_NAME" && -n "$NEW_EMAIL" ]
+    then
+        if [ -z "$OLD_NAME" && -z "$OLD_EMAIL" ]
+        then
+            FILTER='
+                export GIT_AUTHOR_NAME='$NEW_NAME'
+                export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                export GIT_COMMITTER_NAME='$NEW_NAME'
+                export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+            '
+        elif [ -n "$OLD_NAME" && -n "$OLD_EMAIL" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' && "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_AUTHOR_NAME='$NEW_NAME'
+                    export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                fi
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' && "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_NAME='$NEW_NAME'
+                    export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+                fi
+            '
+        elif [ -n "$OLD_NAME" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' ]
+                then
+                    export GIT_AUTHOR_NAME='$NEW_NAME'
+                    export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                fi
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_NAME='$NEW_NAME'
+                    export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+                fi
+            '
+        elif [ -n "$OLD_EMAIL" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_AUTHOR_NAME='$NEW_NAME'
+                    export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                fi
+                if [ "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_NAME='$NEW_NAME'
+                    export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+                fi
+            '
+        fi
+    elif [ -n "$NEW_NAME" ]
+    then
+        if [ -z "$OLD_NAME" && -z "$OLD_EMAIL" ]
+        then
+            FILTER='
+                export GIT_AUTHOR_NAME='$NEW_NAME'
+                export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                export GIT_COMMITTER_NAME='$NEW_NAME'
+            '
+        elif [ -n "$OLD_NAME" && -n "$OLD_EMAIL" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' && "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_AUTHOR_NAME='$NEW_NAME'
+                fi
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' && "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_NAME='$NEW_NAME'
+                fi
+            '
+        elif [ -n "$OLD_NAME" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' ]
+                then
+                    export GIT_AUTHOR_NAME='$NEW_NAME'
+                fi
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_NAME='$NEW_NAME'
+                fi
+            '
+        elif [ -n "$OLD_EMAIL" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_AUTHOR_NAME='$NEW_NAME'
+                fi
+                if [ "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_NAME='$NEW_NAME'
+                fi
+            '
+        fi
+    elif [ -n "$NEW_EMAIL" ]
+    then
+        if [ -z "$OLD_NAME" && -z "$OLD_EMAIL" ]
+        then
+            FILTER='
+                export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+            '
+        elif [ -n "$OLD_NAME" && -n "$OLD_EMAIL" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' && "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                fi
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' && "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+                fi
+            '
+        elif [ -n "$OLD_NAME" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' ]
+                then
+                    export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                fi
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+                fi
+            '
+        elif [ -n "$OLD_EMAIL" ]
+        then
+            FILTER='
+                if [ "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
+                fi
+                if [ "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                then
+                    export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
+                    export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
+                fi
+            '
+        fi
+    fi
+}
 
 # Greetings
-echo "Welcome to the git commit environment variables modifier assistant."
-echo "You can press 'ctrl+c' anytime to quit."
+echo "Welcome!"
 
-while true
+while : ;
 do
-    # Get repository name
-    echo -n "Type in a repo's name to clone: "
-    read repo
-    git clone https://$NAME@$DOMAIN/$NAME/$repo.git
+    # What to change
+    while : ;
+    do
+        echo "What commit info do you want to change about author/committer?"
+        echo "1) username 2) email address 3) both 4) exit"
+        read choice
+        case $choice in
+            1)
+                get_new_name
+                break
+                ;;
+            2)
+                get_new_email
+                break
+                ;;
+            3)
+                get_new_name
+                get_new_email
+                break
+                ;;
+            4)
+                echo "Goodbye!"
+                exit
+                ;;
+            *)
+                echo "Unknown parameter, please choose a correct option."
+                ;;
+        esac
+    done
 
-    # Moving inside created directory
-    cd $repo
+    # How to change
+    while : ;
+    do
+        echo "How do you want to filter out commits?"
+        echo "0) no-filter 1) username 2) email address 3) both 4) exit"
+        read choice
+        case $choice in
+            0)
+                break
+                ;;
+            1)
+                get_old_name
+                break
+                ;;
+            2)
+                get_old_email
+                break
+                ;;
+            3)
+                get_old_name
+                get_old_email
+                break
+                ;;
+            4)
+                echo "Goodbye!"
+                exit
+                ;;
+            *)
+                echo "Unknown parameter, please choose a correct option."
+                ;;
+        esac
+    done
 
-    # Get name to filter out commits
-    echo -n "Type in a name to match (leave blank to match all commits): "
-    read match
+    # Build filter
+    build_filter
 
-    # If match provided then filter out commits
-    if [ -n "$match" ] 
-    then
-        git filter-branch -f --env-filter '
-        if [ "$GIT_AUTHOR_NAME" = '$match' ]
-        then
-            export GIT_AUTHOR_NAME='$NAME'
-            export GIT_AUTHOR_EMAIL='$EMAIL'
-        fi
-        if [ "$GIT_COMMITTER_NAME" = '$match' ]
-        then
-            export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
-            export GIT_COMMITTER_NAME='$NAME'
-            export GIT_COMMITTER_EMAIL='$EMAIL'
-        fi
-        '
-    # else modify all commits
-    else
-        git filter-branch -f --env-filter '
-        export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
-        export GIT_AUTHOR_NAME='$NAME'
-        export GIT_AUTHOR_EMAIL='$EMAIL'
-        export GIT_COMMITTER_NAME='$NAME'
-        export GIT_COMMITTER_EMAIL='$EMAIL'
-        '
-    fi
+    # Execute query
+    while : ;
+    do
+        echo -n "Are you sure you want to apply those changes? This action is irreversible."
+        echo "y) yes n) no"
+        read choice
+        case $choice in
+            y)
+                git filter-branch -f --env-filter $FILTER
+                echo "Operation successful!"
+                break
+                ;;
+            n)
+                echo "Operation aborted."
+                break
+                ;;
+            *)
+                echo "Unknown parameter, please choose a correct option."
+                ;;
+        esac
+    done
 
-    # Push modifications to repository
-    git push -f https://$NAME@$DOMAIN/$NAME/$repo.git
-    
-    # Moving out of directory
-    cd ..
-
-    # Removing directory
-    rm -r -f $repo
-
+    # Run again?
+    while : ;
+    do
+        echo -n "Do you want to run again?"
+        echo "y) yes n) no"
+        read choice
+        case $choice in
+            y)
+                break
+                ;;
+            n)
+                echo "Goodbye!"
+                exit
+                ;;
+            *)
+                echo "Unknown parameter, please choose a correct option."
+                ;;
+        esac
+    done
 done
 
 exit
