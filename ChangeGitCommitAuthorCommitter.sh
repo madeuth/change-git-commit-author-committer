@@ -1,13 +1,17 @@
 #!/bin/sh
 
-# Globals
+#-----------------------------------Globals------------------------------------#
 NEW_NAME=
 OLD_NAME=
 NEW_EMAIL=
 OLD_EMAIL=
 FILTER=
 
-# Getters
+#----------------------------------Functions-----------------------------------#
+display_command_error() {
+    echo "Unknown parameter, please choose a correct option."
+}
+
 get_new_name() {
     echo -n "What is your new username? "
     read NEW_NAME
@@ -43,12 +47,14 @@ build_filter() {
         elif [ -n "$OLD_NAME" -a -n "$OLD_EMAIL" ]
         then
             FILTER='
-                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a 
+                    "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_AUTHOR_NAME='$NEW_NAME'
                     export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
                 fi
-                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a 
+                    "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                     export GIT_COMMITTER_NAME='$NEW_NAME'
@@ -98,11 +104,13 @@ build_filter() {
         elif [ -n "$OLD_NAME" -a -n "$OLD_EMAIL" ]
         then
             FILTER='
-                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a 
+                    "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_AUTHOR_NAME='$NEW_NAME'
                 fi
-                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a 
+                    "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                     export GIT_COMMITTER_NAME='$NEW_NAME'
@@ -147,11 +155,13 @@ build_filter() {
         elif [ -n "$OLD_NAME" -a -n "$OLD_EMAIL" ]
         then
             FILTER='
-                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_AUTHOR_NAME" = '$OLD_NAME' -a 
+                    "$GIT_AUTHOR_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_AUTHOR_EMAIL='$NEW_EMAIL'
                 fi
-                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
+                if [ "$GIT_COMMITTER_NAME" = '$OLD_NAME' -a 
+                    "$GIT_COMMITTER_EMAIL" = '$OLD_EMAIL' ]
                 then
                     export GIT_COMMITTER_DATE="$GIT_COMMITTER_DATE"
                     export GIT_COMMITTER_EMAIL='$NEW_EMAIL'
@@ -187,12 +197,15 @@ build_filter() {
     fi
 }
 
+#-----------------------------------Program------------------------------------#
+
 # Greetings
 echo "Welcome!"
 
+# Main execution loop
 while : ;
 do
-    # What to change
+    # Ask what info to change
     while : ;
     do
         echo "What commit info do you want to change about author/committer?"
@@ -217,12 +230,12 @@ do
                 exit
                 ;;
             *)
-                echo "Unknown parameter, please choose a correct option."
+                display_command_error
                 ;;
         esac
     done
 
-    # How to change
+    # Ask how to filter out commits
     while : ;
     do
         echo "How do you want to filter out commits?"
@@ -250,12 +263,12 @@ do
                 exit
                 ;;
             *)
-                echo "Unknown parameter, please choose a correct option."
+                display_command_error
                 ;;
         esac
     done
 
-    # Build filter
+    # Build filter for git command
     VARS="
         NEW_NAME=$NEW_NAME
         OLD_NAME=$OLD_NAME
@@ -264,10 +277,11 @@ do
     "
     build_filter
 
-    # Execute query
+    # Execute git command
     while : ;
     do
-        echo "Are you sure you want to apply those changes? This action is irreversible."
+        echo -n "Are you sure you want to apply these changes? "
+        echo "This action is irreversible!"
         echo "y) yes n) no"
         read choice
         case $choice in
@@ -281,12 +295,12 @@ do
                 break
                 ;;
             *)
-                echo "Unknown parameter, please choose a correct option."
+                display_command_error
                 ;;
         esac
     done
 
-    # Run again?
+    # Ask if user whant to run again
     while : ;
     do
         echo "Do you want to run again?"
@@ -301,10 +315,11 @@ do
                 exit
                 ;;
             *)
-                echo "Unknown parameter, please choose a correct option."
+                display_command_error
                 ;;
         esac
     done
 done
 
 exit
+#-------------------------------------EOF--------------------------------------#
