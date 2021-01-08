@@ -300,7 +300,7 @@ do
         esac
     done
 
-    # Ask if user whant to run again
+    # Ask if user wants to run again
     while : ;
     do
         echo "Do you want to run again?"
